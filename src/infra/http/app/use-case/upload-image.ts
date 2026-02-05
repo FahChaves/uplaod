@@ -5,33 +5,41 @@ import z from 'zod'
 import { db } from '@/infra/db'
 import { schema } from '@/infra/db/schemas'
 import { type Either, makeLeft, makeRight } from '@/infra/shared/either'
+import { uploadFileToStorage } from '@/infra/storege/upload-file-to-storege'
 
-import { InvalidFileForm } from '../errors/invalid-file-format'
+import { InvalidFileFormat } from '../errors/invalid-file-format'
 
 const uploadImageInput = z.object({
   fileName: z.string(),
   contentType: z.string(),
-  contentStrem: z.instanceof(Readable),
+  contentStream: z.instanceof(Readable),
 })
 
 type UploadImageInput = z.input<typeof uploadImageInput>
 
-const allowedMimeType = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp']
+const allowedMimeTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp']
 
 export async function UploadImage(
   input: UploadImageInput
-): Promise<Either<InvalidFileForm, { url: string }>> {
-  const { contentStrem, contentType, fileName } = uploadImageInput.parse(input)
+): Promise<Either<InvalidFileFormat, { url: string }>> {
+  const { contentStream, contentType, fileName } = uploadImageInput.parse(input)
 
-  if (!allowedMimeType.includes(contentType)) {
-    return makeLeft(new InvalidFileForm())
+  if (!allowedMimeTypes.includes(contentType)) {
+    return makeLeft(new InvalidFileFormat())
   }
 
-  await db.insert(schema.upploads).values({
-    name: fileName,
-    remoteKey: fileName,
-    remoteUrl: fileName,
+  const { key, url } = await uploadFileToStorage({
+    folder: 'images',
+    fileName,
+    contentType,
+    contentStream,
   })
 
-  return makeRight({ url: '' })
+  await db.insert(schema.uploads).values({
+    name: fileName,
+    remoteKey: key,
+    remoteUrl: url,
+  })
+
+  return makeRight({ url, key })
 }

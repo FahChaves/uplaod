@@ -11,7 +11,7 @@ import {
 
 import { env } from '../../env'
 import { transformSwaggerSchema } from './routes/transform-swagger-schema'
-import { uploadImageRoute } from './routes/upload.image'
+import { uploadImageRoute } from './routes/upload-image'
 
 const server = fastify()
 
