@@ -10,7 +10,7 @@ import { env } from '@/env'
 import { r2 } from './client'
 
 const uploadFileToStoregeInput = z.object({
-  folder: z.enum(['images', 'downlaods']),
+  folder: z.enum(['images', 'downloads']),
   fileName: z.string(),
   contentType: z.string(),
   contentStream: z.instanceof(Readable),

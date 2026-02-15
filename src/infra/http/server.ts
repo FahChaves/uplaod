@@ -10,6 +10,8 @@ import {
 } from 'fastify-type-provider-zod'
 
 import { env } from '../../env'
+import { exportUploadsRoute } from './routes/export-uploads'
+import { getUploadsRoute } from './routes/get-upload'
 import { transformSwaggerSchema } from './routes/transform-swagger-schema'
 import { uploadImageRoute } from './routes/upload-image'
 
@@ -18,7 +20,7 @@ const server = fastify()
 server.setValidatorCompiler(validatorCompiler)
 server.setSerializerCompiler(serializerCompiler)
 
-server.setErrorHandler((error, request, reply) => {
+server.setErrorHandler((error, _, reply) => {
   if (hasZodFastifySchemaValidationErrors(error)) {
     return reply.status(400).send({
       message: 'Validation error',
@@ -50,6 +52,9 @@ server.register(fastifySwaggerUi, {
 })
 
 server.register(uploadImageRoute)
+server.register(getUploadsRoute)
+server.register(exportUploadsRoute)
+
 console.log(env.DATABASE_URL)
 
 server.listen({ port: 3333, host: '0.0.0.0' }).then(() => {

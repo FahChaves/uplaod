@@ -3,7 +3,7 @@ import z from 'zod'
 
 import { isRight, unwrapEither } from '@/infra/shared/either'
 
-import { UploadImage } from '../app/use-case/upload-image'
+import { UploadImage } from '../../../app/use-case/upload-image'
 
 export const uploadImageRoute: FastifyPluginAsyncZod = async (server) => {
   server.post(
